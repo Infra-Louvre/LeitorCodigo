@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitor de Código de Barras</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" type="imagex/png" href="LOGO.ico">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div id="corpo">
+        <div id="borde">
+            <div id="nav">
+                <div id="scanner-container">
+                    <img class="logo" src="image.png" alt="Logo" srcset="">
+                    <h1>A CASA BRASILEIRA</h1>
+                </div>
+                <h2>Leitor de Código de Barras</h2>
+             
+
+                <input type="text" id="codigo" maxlength="13" placeholder="Insira o Código" oninput="handleInput()">
+
+
+
+
+                <div id="resultado" style="display: none;">
+                    <h4>Código: <span id="codigoproduto"></span></h4>
+                    <h3>Descrição: <span id="descricao"></span></h3>
+                    <p>Referência: <span id="referencia"></span></p>
+                    <p>Preço: <span id="preco"></span></p>
+                </div>
+
+                <div id="mensagem-erro" style="display: none;">
+                    <p>Erro ao consultar o preço. Verifique o código e tente novamente.</p>
+                </div>
+
+
+
+            </div>
+        </div>
+    </div>
+    <script>
+        function consultarPreco() {
+            let codigo = document.getElementById("codigo").value.trim();
+            console.log("Código inserido:", codigo);
+
+            fetch(`http://localhost:3000/consultapreco?codigo=${codigo}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao consultar o preço.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Dados recebidos:", data);
+                    if (data) {
+                        $("#codigoproduto").text(data.codigo);
+                        $("#descricao").text(data.desc);
+                        $("#referencia").text(data.referencia);
+                        $("#preco").text(data.preco);
+                        $("#resultado").show();
+                        $("#mensagem-erro").hide();
+                    } else {
+                        $("#resultado").hide();
+                        $("#mensagem-erro").show();
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro na requisição:", error);
+                    $("#resultado").hide();
+                    $("#mensagem-erro").show();
+                })
+                .finally(() => {
+                    // Limpar o campo de input após a busca
+                    document.getElementById("codigo").value = "";
+                    document.getElementById("codigo").focus(); // Focar novamente no campo de input
+                });
+        }
+
+        function handleInput() {
+            let codigo = document.getElementById("codigo").value.trim();
+            if (codigo.length === 13) {
+                consultarPreco();
+            }
+        }
+
+        // Garantir que o campo de input receba o foco ao carregar a página
+        document.getElementById("codigo").focus();
+    </script>
+</body>
+
+</html>
